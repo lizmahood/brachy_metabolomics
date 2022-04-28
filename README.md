@@ -11,10 +11,10 @@ They assume you have downloaded and set up SIRIUS4.
 
 They launch [MS-FINDER's](http://prime.psc.riken.jp/compms/msfinder/main.html "MSFINDER Home") molecular networing functionality. The network is visualized using [Cytoscape](https://cytoscape.org/ "Cytoscape home"), and some Cytoscape output files are needed for full functionality of the molecular networking scripts. To run all molecular networking scripts, you must have MSFINDER and Cytoscape installed.
 
-### NOTES ON COLUMN NAMES/SAMPLE NAMES
-All of my samples were named as such: Hydro.Ctrl.Leaf_5, Sym.SporeW.Root_2, etc. The nomenclature is: group.condition.organ_replicate. This nomenclature is essential to run certain scripts properly (anything comparing a condition to its control). Control conditions must be labelled as Ctrl (see above).
-
 **All of the above softwares are free!**
+
+### NOTES ON COLUMN NAMES/SAMPLE NAMES:
+All of my samples were named as such: Hydro.Ctrl.Leaf_5, Sym.SporeW.Root_2, etc. The nomenclature is: group.condition.organ_replicate. This nomenclature is essential to run certain scripts properly (anything comparing a condition to its control). Control conditions must be labelled as Ctrl (see above).
 
 For most of these scripts, if you are wondering what arguments they take, just launch the script without any arguments at all. It will tell you what arguments to provide, in what order.
 
