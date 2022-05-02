@@ -191,7 +191,7 @@ vs_norm <- function(prepl, idcol, ccols, tcols, blkcol, sweights, sncol, lt, mis
   #'normalization. 5: Detect and remove replicate outliers via correlation 
   #'6: impute (if wanted) 7: vsn (if wanted)
   
-  if (length(tcols) != 0){
+  if (tcols != 0){
     asycols <- c(ccols, tcols)
   }else asycols <- ccols
   #print(colnames(pl)[asycols])
@@ -460,7 +460,7 @@ if (length(args) != 20){
        16) threshold for S/N value per individual sample
        17) blank groups. If multiple blanks, input as:
            [blank1-asycol1,asycol2][blank2-asycol4,asycol5]
-       18) Qc columns, ("none" if there are none)
+       18) Qc columns, ("none" if there are none), separate with comma if multiple
        19) IDs of metabolites to track, "none" for none
        20) Cutoff for missing values')
 }

@@ -1,4 +1,4 @@
-##Now, finally, for PCAs
+##Now, for PCAs
 library(ggplot2)
 library(FactoMineR)
 library(factoextra)

@@ -27,10 +27,8 @@ for (level in 1:4){
     for (cls in unique(both$CF_class)){
       subset <- both[which(both$CF_class == cls),]
       print(subset)
-      if (!(cls %in% c('Phenols', 'Glycerophospholipids'))){
-        perct_wrong <- length(which(!(subset$class == subset$CF_class))) / nrow(subset)
-        wrong_class <- c(wrong_class, perct_wrong)
-      }
+      perct_wrong <- length(which(!(subset$class == subset$CF_class))) / nrow(subset)
+      wrong_class <- c(wrong_class, perct_wrong)
     }
     print(median(wrong_class))
     print(sort(wrong_class))

@@ -31,15 +31,15 @@ get_tic <- function(fils, datt, outp){
   legend("topright", legend = names(group_c), fill = unname(group_c), ncol = 3)
   dev.off()
   ##plotting zoomed in
-  pdf(paste0(outp, '/zoomed_in_TIC.pdf'))
-  plot(tics, col = group_c[datt$conds], ylim = c(0, 2.5e+08))
-  legend("topright", legend = names(group_c), fill = unname(group_c), ncol = 3)
-  dev.off()
+  #pdf(paste0(outp, '/zoomed_in_TIC.pdf'))
+  #plot(tics, col = group_c[datt$conds], ylim = c(0, 2.5e+08))
+  #legend("topright", legend = names(group_c), fill = unname(group_c), ncol = 3)
+  #dev.off()
   ##plotting deadvol removed
-  pdf(paste0(outp, '/no_deadvol_TIC.pdf'))
-  plot(tics, col = group_c[datt$conds], xlim = c(90, 960))
-  legend('topright', legend = names(group_c), fill = unname(group_c), ncol = 3)
-  dev.off()
+  #pdf(paste0(outp, '/no_deadvol_TIC.pdf'))
+  #plot(tics, col = group_c[datt$conds], xlim = c(90, 960))
+  #legend('topright', legend = names(group_c), fill = unname(group_c), ncol = 3)
+  #dev.off()
 }
 
 make_sample_nam <- function(nam, pat){
@@ -115,41 +115,30 @@ make_pd <- function(snams, conds){
   return(data.frame(snams, conds, stringsAsFactors = F))
 }
 
-# 
-# argg <- commandArgs(T)
-# 
-# if (length(argg) != 1){
-#   stop('ARG: Is this for All experiments combined? yes OR no')
-# }
-# 
-# if (argg[1] == 'no'){
-#   conditions <- c('Copper_Heat', 'Symbiosis', 'Tissue_ctrl')
-#   pats <- c('Hydro-', 'Sym-', 'Tis-')
-#   modes <- c('FPS', 'NEG', 'POS')
-# }else{
-#   conditions <- c('All_exps')
-#   pats <- c('all')
-#   modes <- c('NEG', 'POS')
-# }
 
-modes <- c('NEG', 'POS')
-#bigpath <- 'E:/MS_Data/BrachyMetabolites/original_files'
-bigpath <- 'E:/MS_Data/BrachyMetabolites/cuheat/second_cuheat_metabolomics/original_files'
-for (cnds in 1:length(conditions)){
-  for (mod in modes){
-    #filpth <- paste(bigpath, conditions[cnds], mod, sep = '/')
-    filpth <- paste(bigpath, mod, sep = '/')
-    fils <- list.files(filpth, full.names = T, pattern = 'mzML')
-    print(head(fils))
-    #snames <- make_sample_nam(fils, pats[cnds])
-    snames <- make_sample_nam(fils, 'all')
-    print(head(snames))
-    #condts <- make_condition(snames, pats[cnds])
-    condts <- make_condition(snames, 'Hydro')
-    print(head(condts))
-    pddf <- make_pd(snames, condts)
-    get_tic(fils, pddf, filpth)
-    print(paste0('Done with ', mod))
-  }
+argg <- commandArgs(T)
+if (length(argg) != 3){
+  stop('ARGS: 1) Path to folder containing mzML files. All files in this folder
+       will be put on the same graph. 2) tsv indicating how sample names should
+       appear in the legend (first column unique sample name, second column 
+       abbreviation). 3) output folder')
 }
+
+bigpath <- argg[1]
+pddf <- read.table(argg[2], sep = '\t', header = T, fill = NA, quote = "")
+colnames(pddf)[2] <- 'conds'
+
+filpth <- bigpath
+fils <- list.files(filpth, full.names = T, pattern = 'mzML')
+print(head(fils))
+#snames <- make_sample_nam(fils, pats[cnds])
+#snames <- make_sample_nam(fils, 'all')
+#print(head(snames))
+#condts <- make_condition(snames, pats[cnds])
+#condts <- make_condition(snames, 'Hydro')
+#print(head(condts))
+#pddf <- make_pd(snames, condts)
+get_tic(fils, pddf, filpth)
+print(paste0('Done with ', mod))
+
 

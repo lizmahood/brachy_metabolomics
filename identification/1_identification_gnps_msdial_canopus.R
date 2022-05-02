@@ -3,35 +3,29 @@
 
 argg <- commandArgs(T)
 
-if (length(argg) != 7){
-  stop('ARGS: 1) Fully processed and filtered peak area file 2) New peak
-       area file with MSDIAL identifications 3) Canopus file 4)
-       GNPS\' .graphml cytoscape node file 5) folder of DAMs
-       6) file of our MSFINDER network nodes
-       7) output folder and file name prefix')
+if (length(argg) != 6){
+  stop('ARGS: 1) Fully processed and filtered peak area file, with identifications
+       2) Canopus file 3) GNPS\' .graphml cytoscape node file 4) folder of DAMs
+       5) file of our MSFINDER network nodes
+       6) output folder and file name prefix')
 }
 
-get_msdial_id <- function(id_df, filtered_df){
-  testy <- merge(id_df, filtered_df, by = c('Average.Rt.min.', 'Average.Mz',
-                                            'MS1.isotopic.spectrum', 'MS.MS.spectrum'))
-  testy <- testy[ , !names(testy) %in% c('Metabolite.name.y', 'Ontology.y', 'INCHIKEY.y',
-                                         'Dot.product.y', 'Reverse.dot.product.y')]
-  
+get_msdial_id <- function(filtered_df){
+  testy <- filtered_df
+
   ## got to change these columns to numeric
-  testy$Dot.product.x[testy$Dot.product.x == 'null'] <- 0
-  testy$Reverse.dot.product.x[testy$Reverse.dot.product.x == 'null'] <- 0
+  testy$Dot.product[testy$Dot.product == 'null'] <- 0
+  testy$Reverse.dot.product[testy$Reverse.dot.product == 'null'] <- 0
   
-  testy$Dot.product.x <- as.numeric(testy$Dot.product.x)
-  testy$Reverse.dot.product.x <- as.numeric(testy$Reverse.dot.product.x)
+  testy$Dot.product <- as.numeric(testy$Dot.product)
+  testy$Reverse.dot.product <- as.numeric(testy$Reverse.dot.product)
   
   ## Which ones have IDs?
-  testy_id <- testy[which(testy$Dot.product.x > 80 & testy$Reverse.dot.product.x > 80),]
+  testy_id <- testy[which(testy$Dot.product > 80 & testy$Reverse.dot.product > 80),]
   
   ## Returning the ID'd ones
-  colnames(testy_id)[5] <- 'NewAlignment.ID'
-  colnames(testy_id)[11] <- 'Alignment.ID'
-  
-  return(testy_id[, c(5,6,7,8,9,10,11)])
+  return(testy_id[, c('Alignment.ID', 'Metabolite.name', 'Ontology',
+                      'INCHIKEY', 'Dot.product', 'Reverse.dot.product')])
 }
 
 get_condname <- function(damfiles){
@@ -71,21 +65,20 @@ combine_all <- function(canopus, gnps_id, msdial_id){
 
 ## READING IN
 filtered_df <- read.table(argg[1], sep = '\t', header = T, fill = NA, quote = "")
-id_df <- read.table(argg[2], sep = '\t', header = T, fill = NA, quote = "")
-canopus <- read.table(argg[3], sep = '\t', header = T, fill = NA, quote = "")
-gnps_id <- read.table(argg[4], sep = '\t', header = T, fill = NA, quote = "")
-damfiles <- list.files(argg[5], pattern = 'FDR', full.names = T)
-network <- read.table(argg[6], header = T, fill = NA, quote = "", sep = '\t')
+canopus <- read.table(argg[2], sep = '\t', header = T, fill = NA, quote = "")
+gnps_id <- read.table(argg[3], sep = '\t', header = T, fill = NA, quote = "")
+damfiles <- list.files(argg[4], pattern = 'FDR', full.names = T)
+network <- read.table(argg[5], header = T, fill = NA, quote = "", sep = '\t')
 
 ## Getting only columns needed from id_df
-id_df <- id_df[, c(1, 2, 3, 4, 12, 13, 26, 27, 31, 32)]
+id_df <- filtered_df[, c(1, 2, 3, 4, 12, 13, 26, 27, 31, 32)]
 
 gnps_id$Analog.MQScore <- as.numeric(gnps_id$Analog.MQScore)
 gnps_id <- gnps_id[which(gnps_id$MQScore > 0.8),]
 gnps_id <- gnps_id[, c('name', 'Analog.MQScore', 'Analog.Compound_Name',
                        'Analog.INCHI', 'Data_Collector')]
 
-msdial_id <- get_msdial_id(id_df, filtered_df)
+msdial_id <- get_msdial_id(filtered_df)
 
 condnames <- get_condname(damfiles)
 idlist <- get_alignment_ids(damfiles, condnames)
@@ -108,8 +101,8 @@ all_out$DAM_conditions <- damtmp
 all_out_nodes <- merge(all_out, network, by.x = 'Alignment.ID', 
                        by.y = 'Alignment.ID')
 
-write.table(all_out, file = paste0(argg[7], '_gnps_msdial_canopus_id.tsv'),
+write.table(all_out, file = paste0(argg[6], '_gnps_msdial_canopus_id.tsv'),
             sep = '\t', row.names = F, quote = F)
 
-write.table(all_out_nodes, file = paste0(argg[7], '_network_metablite_annotations.tsv'), 
+write.table(all_out_nodes, file = paste0(argg[6], '_network_metablite_annotations.tsv'), 
             sep = '\t', row.names = F, quote = F)

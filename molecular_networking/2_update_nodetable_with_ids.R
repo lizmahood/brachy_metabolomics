@@ -16,7 +16,7 @@ canopus_node$is_identified <- ifelse(canopus_node$Alignment.ID %in% idd$Alignmen
 
 ## Getting the name of the identifications of the IDd compounds
 small_id <- idd[, c('Alignment.ID', 'Analog.Compound_Name', 'Name_MSDIAL')]
-canopus_idd <- merge(canopus_node, small_id, by = 'Alignment.ID')
+canopus_idd <- merge(canopus_node, small_id, by = 'Alignment.ID', all.x = T)
 
 write.table(canopus_idd, file = paste0(argg[3], 'updated_identifications.tsv'),
             row.names = F, quote = F, sep = '\t')
