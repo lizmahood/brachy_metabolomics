@@ -466,7 +466,8 @@ if (length(args) != 20){
 }
 
 
-peakarea <- read.table(args[1], sep = '\t', header = T, stringsAsFactors = F, quote = "", fill = NA)
+peakarea <- read.table(args[1], sep = '\t', header = T, stringsAsFactors = F, 
+                       quote = "", fill = NA, comment.char = '')
 idcol <- as.numeric(args[2])
 if (grepl(',', args[3], fixed = T)){
   treatcol <- as.numeric(unlist(strsplit(args[3], ',')))
@@ -481,13 +482,15 @@ if (grepl(',', args[5], fixed = T)) {
 swt <- as.numeric(unlist(strsplit(args[6], ',')))
 snc <- as.numeric(args[7])
 sncut <- as.numeric(args[8])
-peakheight <- read.table(args[9], sep = '\t', header = T, stringsAsFactors = F, quote = "", fill = NA)
+peakheight <- read.table(args[9], sep = '\t', header = T, stringsAsFactors = F, 
+                         quote = "", fill = NA, comment.char = '')
 logt <- as.character(args[10])
 immp <- as.character(args[11])
 tlid <- as.numeric(args[12])
 varsn <- as.character(args[13])
 isd <- as.character(args[14])
-snmat <- read.table(args[15], sep = '\t', header = T, stringsAsFactors = F, quote = "", fill = NA)
+snmat <- read.table(args[15], sep = '\t', header = T, stringsAsFactors = F, 
+                    quote = "", fill = NA, comment.char = '')
 snt <- as.numeric(args[16])
 blankgroups <- args[17]
 
