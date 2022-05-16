@@ -367,8 +367,8 @@ vs_norm <- function(prepl, idcol, ccols, tcols, blkcol, sweights, sncol, lt, mis
     cls <- h[[i]]
     corr <- cor(knnasy[,cls])
     
-    ##which columns in h[[i]] have at least 3 correlations < 0.7
-    fbad <- which(unname(colSums(corr < 0.7)) > 2)
+    ##which columns in h[[i]] have at least 2 correlations < 0.7
+    fbad <- which(unname(colSums(corr < 0.7)) >= 2)
     
     if (length(fbad) >= 1) {
       fgood <- h[[i]][-fbad]
