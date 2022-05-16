@@ -21,7 +21,7 @@ make_pca <- function(metabs, all){
   conds <- c(); tiss <- c()
   print(colnames(metabs))
   for (col in colnames(metabs)){
-    if (grepl('Leaf', col)){
+    if (grepl('Leaf|leaf', col)){
       tiss <- c(tiss, 'Leaf')
     }else if (grepl('Root', col)){
       tiss <- c(tiss, 'Root')
@@ -46,7 +46,7 @@ make_pca <- function(metabs, all){
   return(list(pca1, tmetabs))
 }
 
-graph_pca <- function(pca1, tmetabs, odir, color_vec){
+graph_pca <- function(pca1, tmetabs, odir, color_vec, tistog){
   tmetabs$pc1 <- pca1$ind$coord[, 1]
   tmetabs$pc2 <- pca1$ind$coord[, 2]
   varexp1 <- round(pca1$eig[1,2], 2)
@@ -58,7 +58,7 @@ graph_pca <- function(pca1, tmetabs, odir, color_vec){
   pca.vars.m <- melt(pca.vars, id.vars = "vars")
   
   
-  if (length(unique(tmetabs$tiss)) > 1){
+  if (tistog == 'yes'){
     p <- ggplot(tmetabs, aes(pc1, pc2, color = conds, shape = tiss, size = 1, label = rownames(tmetabs))) +
       geom_point(alpha = 0.8) + geom_hline(yintercept = 0, lty = 2) + scale_color_manual(values = color_vec) +
       geom_vline(xintercept = 0, lty = 2) + theme_bw() + guides(size = 'none', label = 'none',
@@ -67,7 +67,7 @@ graph_pca <- function(pca1, tmetabs, odir, color_vec){
       xlab(paste0('PC 1 (', varexp1, '%)')) + ylab(paste0('PC 2 (', varexp2, '%)')) + 
       scale_fill_manual(values = color_vec) + theme(legend.position = 'top', legend.box = 'vertical', aspect.ratio = 1)
   
-    pdf(paste0(odir, '_pca.pdf'), height = 4, width = 4)
+    pdf(paste0(odir, '_pca.pdf'), height = 6, width = 6)
     print(p)
     dev.off()
   }else {
@@ -85,7 +85,7 @@ graph_pca <- function(pca1, tmetabs, odir, color_vec){
       xlab(paste0('PC 1 (', varexp1, '%)')) + ylab(paste0('PC 2 (', varexp2, '%)')) + 
       scale_fill_manual(values = color_vec) + theme(legend.position = 'top', legend.box = 'vertical', aspect.ratio = 1)
     
-    pdf(paste0(odir, '_pca.pdf'), height = 4, width = 4)
+    pdf(paste0(odir, '_pca.pdf'), height = 6, width = 6)
     print(p)
     dev.off()
   }
@@ -133,8 +133,8 @@ if (tistog == 'yes'){
   ## new colors for publication 9/30/21
   cvec <- c('salmon', 'mediumslateblue','palegreen', 'goldenrod2',
             'lightblue', 'forestgreen', 'plum3', 'darkorchid4', 'pink',
-            'azure4')
-  graph_pca(pca1, tmetabs, odir, cvec)
+            'azure4', 'black', 'peru')
+  graph_pca(pca1, tmetabs, odir, cvec, tistog)
 }else if (tistog == 'no'){
   rootmat <- metabs[,which(grepl('Root', colnames(metabs)))]
   leafmat <- metabs[,which(grepl('Leaf', colnames(metabs)))]
@@ -146,8 +146,8 @@ if (tistog == 'yes'){
             'lightblue','forestgreen', 'plum3', 'pink')
   rvec <- c('salmon', 'mediumslateblue','palegreen', 'goldenrod2',
              'lightblue', 'forestgreen','plum3')
-  graph_pca(pcar1, trootmat, paste0(odir, 'ROOT'), rvec)
-  graph_pca(pcal1, tleafmat, paste0(odir, 'LEAF'), lvec)
+  graph_pca(pcar1, trootmat, paste0(odir, 'ROOT'), rvec, tistog)
+  graph_pca(pcal1, tleafmat, paste0(odir, 'LEAF'), lvec, tistog)
 }
 
 print('Done!')
