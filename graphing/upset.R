@@ -52,7 +52,7 @@ get_alignment_ids <- function(damfiles, conds, typ){
 make_colors <- function(conds){
   out <- c()
   for (cond in conds){
-    if (grepl('Leaf', cond)){
+    if (grepl('Leaf|leaf', cond)){
       out <- c(out, 'forestgreen')
     }
     else out <- c(out, 'saddlebrown')
@@ -66,8 +66,8 @@ if (typ == 'metabs'){
 }else damfiles <- list.files(argg[1], full.names = T)
 
 ## new 10.3.21 to plot leaves together and roots together
-leafdam <- damfiles[grepl('Leaf', damfiles)]
-rootdam <- damfiles[grepl('Root', damfiles)]
+leafdam <- damfiles[grepl('Leaf|leaf', damfiles)]
+rootdam <- damfiles[grepl('Root|root', damfiles)]
 
 leafcondnames <- get_condname(leafdam, typ)
 rootcondnames <- get_condname(rootdam, typ)
@@ -78,7 +78,7 @@ rootidlist <- get_alignment_ids(rootdam, rootcondnames, typ)
 
 idlist <- c(leafidlist, rootidlist)
 colorvec <- make_colors(condnames)
-tisdata <- ifelse(grepl('Leaf', condnames), 'Leaf', 'Root')
+tisdata <- ifelse(grepl('Leaf|leaf', condnames), 'Leaf', 'Root')
 metadata <- as.data.frame(cbind(condnames, tisdata))
 
 ##plotting
