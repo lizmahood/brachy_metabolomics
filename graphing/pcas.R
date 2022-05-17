@@ -19,7 +19,6 @@ get_groups <- function(df, typ){
 make_pca <- function(metabs, all){
   ##metabs is a data frame
   conds <- c(); tiss <- c()
-  print(colnames(metabs))
   for (col in colnames(metabs)){
     if (grepl('Leaf|leaf', col)){
       tiss <- c(tiss, 'Leaf')
@@ -120,7 +119,9 @@ if (typ == 'metab'){
   dev.off()
   
 }else if (typ == 'trans'){
-  metabs <- infil[,2:ncol(infil)]
+  if (is.numeric(infil[,1])){
+    metabs <- infil
+  }else metabs <- infil[,2:ncol(infil)]
   colnames(metabs) <- sub('_', '.', colnames(metabs), fixed = T)
   colnames(metabs) <- sub('_', '.', colnames(metabs), fixed = T)
   groups <- get_groups(metabs, typ)

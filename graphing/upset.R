@@ -17,7 +17,6 @@ if (length(argg) != 4){
 
 get_condname <- function(damfiles, typ){
   bases <- basename(damfiles)
-  print(bases)
   if (typ == 'metabs'){
     conds <- unlist(lapply(strsplit(bases, '_'), '[[', length(strsplit(bases, '_')) + 7))
     print(conds)
@@ -29,8 +28,6 @@ get_condname <- function(damfiles, typ){
 get_alignment_ids <- function(damfiles, conds, typ){
   olist <- list()
   for (fil in 1:length(damfiles)){
-    print(damfiles)
-    print(fil)
     tmp <- read.table(damfiles[fil], sep = '\t', header = T, fill = NA)
     if (typ == 'metabs'){
       olist[[conds[fil]]] <- tmp$Alignment.ID
@@ -43,6 +40,8 @@ get_alignment_ids <- function(damfiles, conds, typ){
         olist[[conds[fil]]] <- ntmp$GeneID
       } else if ('X' %in% colnames(ntmp)){
         olist[[conds[fil]]] <- ntmp$X
+      } else if (grepl('[a-z]', rownames(ntmp)[1])){
+        olist[[conds[fil]]] <- rownames(ntmp)
       }
     }
   }
@@ -82,14 +81,14 @@ tisdata <- ifelse(grepl('Leaf|leaf', condnames), 'Leaf', 'Root')
 metadata <- as.data.frame(cbind(condnames, tisdata))
 
 ##plotting
-pdf(paste0(argg[2], '.pdf'), width = 7.5, height = 6)
+pdf(paste0(argg[2], '.pdf'), width = 8, height = 6)
 #upset(fromList(idlist), sets = names(idlist), order.by = 'freq', keep.order = T, sets.bar.color = colorvec,
 #      set.metadata = list(data = metadata, plots = list(list(type = "matrix_rows", 
 #                          column = "tisdata", colors = c(Leaf = "forestgreen", Root = 'darkgoldenrod'), 
 #                          alpha = 0.4))))
 
 upset(fromList(idlist), sets = names(idlist), order.by = 'freq', keep.order = T, 
-      number.angles = 30, sets.bar.color = colorvec, nintersects = NA, 
+      number.angles = 30, sets.bar.color = colorvec, nintersects = NA,
       sets.x.label = 'DAMs per Condition', point.size = 1.5,
       mainbar.y.label = 'DAM Intersections', text.scale = c(1.3, 1, 1.3, 1, 1.3, 0.75),
       set.metadata = list(data = metadata, plots = list(list(type = "matrix_rows", 
