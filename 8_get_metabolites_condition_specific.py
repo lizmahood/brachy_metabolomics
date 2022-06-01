@@ -46,6 +46,8 @@ def find_dists(infil, omics):
                 inlist = inl.strip().split('\t')
                 for k, v in conds.items():
                     pkareas = [float(inlist[col]) for col in v]
+                    if omics == 'trans':
+                        pkareas = [v + 0.001 for v in pkareas]
                     med = median(pkareas)
                     tmpd[k] = med
 
@@ -62,11 +64,12 @@ def find_dists(infil, omics):
     
     return np.percentile(fcl, 95)
 
-def get_specificity(inlist, conds, cutoff):
+def get_specificity(inlist, conds, cutoff, omics):
     '''
     :param inlist: list of peak areas for a metabolite
     :param conds: dict of conditions (from get_groups)
     :param cutoff: float for fold change cutoff
+    :param omics: string
     Func checks for specificy of a metabolite
     If it is highly expressed in one condition only
     RETURNS: False OR a (string, float) tuple
@@ -76,6 +79,8 @@ def get_specificity(inlist, conds, cutoff):
     medarea = {}
     for k, v in conds.items():
         pkareas = [float(inlist[col]) for col in v]
+        if omics == 'trans':
+            pkareas = [v + 0.001 for v in pkareas]
         med = median(pkareas)
         medarea[k] = med
 
@@ -83,7 +88,9 @@ def get_specificity(inlist, conds, cutoff):
         allotherareas = [medarea[k] for k in medarea.keys() if k != cond]
         ## 14 is ROUGHLY equal to peak aboundance of 1e5. This checks to see that
         ## if a metab is in other conditions, it's lowly abundand.
-        if area / max(allotherareas) >= cutoff and max(allotherareas) <= 14:
+        if area / max(allotherareas) >= cutoff and max(allotherareas) <= 14 and omics == 'metab':
+            return cond, area, area/max(allotherareas)
+        elif area / max(allotherareas) >= cutoff and max(allotherareas) <= 10 and omics == 'trans':
             return cond, area, area/max(allotherareas)
 
     return False
@@ -106,7 +113,7 @@ def get_cond_specific_metabs(infil, omics):
         print(conds)
         while inl:
             if (omics == 'metab' and inl[0].isdigit()) or (omics == 'trans' and inl[0] == 'B'):
-                result = get_specificity(inl.strip().split('\t'), conds, cutoff)
+                result = get_specificity(inl.strip().split('\t'), conds, cutoff, omics)
                 if result:
                     avgarea = result[1]
                     cond = result[0]

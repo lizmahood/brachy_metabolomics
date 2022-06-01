@@ -44,7 +44,7 @@ change_values <- function(fullinp){
 argg <- commandArgs(T)
 
 if (length(argg) != 2){
-  stop('ARGS: 1) vSN Normalized peak area file, 2) Non-VSN normalized PeakArea file')
+  stop('ARGS: 1) VSN Normalized peak area file, 2) Filtered peak area file, but without VSN')
 }
 
 fullinp <- read.table(argg[1], sep = '\t', header = T, stringsAsFactors = F, quote = "", fill = NA)
