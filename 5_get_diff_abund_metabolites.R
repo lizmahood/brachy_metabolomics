@@ -126,18 +126,32 @@ allg <- argg[4]
 topcut <- as.numeric(argg[5]); bottomcut <- as.numeric(argg[6])
 
 newgroups <- get_groups(npeakarea[,-c(1:32)])
-leaves <- newgroups[which(grepl('Leaf', newgroups))]
-roots <- newgroups[which(grepl('Root', newgroups))]
+#leaves <- newgroups[which(grepl('Leaf', newgroups))]
+#roots <- newgroups[which(grepl('Root', newgroups))]
 
-if (allg == 'yes'){
-  hleaves <- leaves[which(grepl('Hydro', leaves))]
-  hroots <- roots[which(grepl('Hydro', roots))]
-  sleaves <- leaves[which(grepl('Sym', leaves))]
-  sroots <- roots[which(grepl('Sym', roots))]
-  combined <- list(hleaves, hroots, sleaves, sroots)
-} else {
-  combined <- list(leaves, roots)
+#if (allg == 'yes'){
+#  hleaves <- leaves[which(grepl('Hydro', leaves))]
+#  hroots <- roots[which(grepl('Hydro', roots))]
+#  sleaves <- leaves[which(grepl('Sym', leaves))]
+#  sroots <- roots[which(grepl('Sym', roots))]
+#  combined <- list(hleaves, hroots, sleaves, sroots)
+#} else {
+#  combined <- list(leaves, roots)
+#}
+newgroups <- newgroups[which(str_count(newgroups, fixed(".")) == 2)]
+
+tissues <- unlist(lapply(strsplit(newgroups, '.', fixed = T), '[[', 3))
+tissues <- unique(str_to_title(tissues))
+combined <- list()
+for (t in tissues){
+  tmp <- newgroups[which(grepl(t, newgroups))]
+  conds <- unique(lapply(strsplit(tmp, '.', fixed = T), '[[', 1))
+  for (cd in conds){
+    tmp2 <- tmp[which(grepl(cd, tmp))]
+    combined[[paste0(t, cd, sep = '.')]] <- tmp2
+  }
 }
+
 
 da_ids <- c()
 for (tissue in combined){
