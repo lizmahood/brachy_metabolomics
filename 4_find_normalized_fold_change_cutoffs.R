@@ -4,15 +4,16 @@ library(ggplot2)
 library(tidyverse)
 library(grid)
 library(reshape2)
+library(stringr)
 
 get_fc <- function(ctrlv, stressv){
+  ctrlv[ctrlv <= 0.01] <- 1e-30
   nctm <- rowMeans(ctrlv)
-  nctm[nctm <= 0.01] <- 1e-30
+  
+  stressv[stressv <= 0.01] <- 1e-30
   nstm <- rowMeans(stressv)
-  ## new 9.30.21
-  nstm[nstm <= 0.01] <- 1e-30
+  
   logfc <- log2(nstm/nctm)
-  #ifelse(nstm <= 0.01, logfc <- 0, logfc <- log2(nstm/nctm))
   return(logfc)
 }
 
@@ -28,18 +29,22 @@ get_all_fc <- function(combined, df_of_int){
     if (length(tissue) > 0){
       tname <- unique(tissue[grepl('Ctrl.', tissue)])
       ctrlcol <- which(grepl(tname, colnames(df_of_int)))
-      print('Control: ')
-      print(colnames(df_of_int[ctrlcol][1]))
-      treat <- tissue[-which(grepl('Ctrl', tissue))]
-      uniq <- unique(treat)
-      for (cond in uniq){
-        print(cond)
-        ttreat <- which(grepl(paste0('^', cond), colnames(df_of_int)))
-        if (length(ttreat) > 1 & length(ctrlcol) > 1){
-          print(str(df_of_int[,ttreat]))
-          fcs <- get_fc(df_of_int[,ctrlcol], df_of_int[,ttreat])
-          print(head(fcs))
-          all_fc[[cond]] <- fcs
+      if (length(ctrlcol) > 0){
+        treat <- tissue[-which(grepl('Ctrl', tissue))]
+        if (length(treat) > 0){
+          uniq <- unique(treat)
+          for (cond in uniq){
+            ttreat <- which(grepl(paste0('^', cond), colnames(df_of_int)))
+            if (length(ttreat) > 1 & length(ctrlcol) > 1){
+              print('Control: ')
+              print(str(df_of_int[,ctrlcol]))
+              print('Stress: ')
+              print(str(df_of_int[,ttreat]))
+              fcs <- get_fc(df_of_int[,ctrlcol], df_of_int[,ttreat])
+              print(head(fcs))
+              all_fc[[cond]] <- fcs
+            }
+          }
         }
       }
     }
@@ -51,50 +56,52 @@ get_all_fc <- function(combined, df_of_int){
 
 argg <- commandArgs(T)
 
-if(length(argg) != 3){
-  stop('ARGS: 1) File of NORMALIZED peak area 2) Corresponding file of NON-NORM
-       peak area 3) All experiments together? yes OR no')
+if(length(argg) != 2){
+  stop('ARGS: 1) File of NORMALIZED peak area, with negatives turned to 0
+       2) Corresponding file of NON-NORM peak area')
 }
 
 
 npeakarea <- read.table(argg[1], sep = '\t', fill = NA, quote = "", header = T)
 pkareaorg <- read.table(argg[2], sep = '\t', fill = NA, quote = "", header = T)
-allg <- argg[3]
+
 
 ## Do once for getting all new fold changes
 newgroups <- get_groups(npeakarea[,-c(1:32)])
-nleaves <- newgroups[which(grepl('Leaf', newgroups))]
-nroots <- newgroups[which(grepl('Root', newgroups))]
 
-if (allg == 'yes'){
-  nhleaves <- nleaves[which(grepl('Hydro', nleaves))]
-  nhroots <- nroots[which(grepl('Hydro', nroots))]
-  nsleaves <- nleaves[which(grepl('Sym', nleaves))]
-  nsroots <- nroots[which(grepl('Sym', nroots))]
-  ncombined <- list(nhleaves, nhroots, nsleaves, nsroots)
-} else {
-  ncombined <- list(nleaves, nroots)
+
+tissues <- unlist(lapply(strsplit(newgroups, '.', fixed = T), '[[', 3))
+tissues <- unique(str_to_title(tissues))
+ncombined <- list()
+for (t in tissues){
+  tmp <- newgroups[which(grepl(t, newgroups))]
+  conds <- unique(lapply(strsplit(tmp, '.', fixed = T), '[[', 1))
+  for (cd in conds){
+    tmp2 <- tmp[which(grepl(cd, tmp))]
+    ncombined[[paste0(t, cd, sep = '.')]] <- tmp2
+  }
 }
+
 
 new_fcs <- get_all_fc(ncombined, npeakarea[,-c(1:32)])
 
 
 ## Do again for getting new fold changes
-orggroups <- get_groups(pkareaorg[,-c(1:32, ncol(pkareaorg))])
-oleaves <- orggroups[which(grepl('Leaf', orggroups))]
-oroots <- orggroups[which(grepl('Root', orggroups))]
+ogroups <- get_groups(pkareaorg[,-c(1:32, ncol(pkareaorg))])
 
-if (allg == 'yes'){
-  ohleaves <- oleaves[which(grepl('Hydro', oleaves))]
-  ohroots <- oroots[which(grepl('Hydro', oroots))]
-  osleaves <- oleaves[which(grepl('Sym', oleaves))]
-  osroots <- oroots[which(grepl('Sym', oroots))]
-  ocombined <- list(ohleaves, ohroots, osleaves, osroots)
-} else {
-  ocombined <- list(oleaves, oroots)
+otissues <- unlist(lapply(strsplit(ogroups, '.', fixed = T), '[[', 3))
+otissues <- unique(str_to_title(otissues))
+ocombined <- list()
+for (t in otissues){
+  otmp <- ogroups[which(grepl(t, ogroups))]
+  oconds <- unique(lapply(strsplit(otmp, '.', fixed = T), '[[', 1))
+  for (cd in oconds){
+    otmp2 <- otmp[which(grepl(cd, otmp))]
+    ocombined[[paste0(t, cd, sep = '.')]] <- otmp2
+  }
 }
 
-org_fcs <- get_all_fc(ocombined, pkareaorg[,-c(1:32, 115)])
+org_fcs <- get_all_fc(ocombined, pkareaorg[,-c(1:32, ncol(pkareaorg))])
 
 ## getting indices of metabs with original fc <2 and >-2 (non-significant)
 nonsig_org <- which(abs(org_fcs$value) < 2)
