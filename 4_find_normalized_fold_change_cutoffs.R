@@ -68,7 +68,7 @@ pkareaorg <- read.table(argg[2], sep = '\t', fill = NA, quote = "", header = T)
 
 ## Do once for getting all new fold changes
 newgroups <- get_groups(npeakarea[,-c(1:32)])
-
+newgroups <- newgroups[which(str_count(newgroups, fixed(".")) == 2)]
 
 tissues <- unlist(lapply(strsplit(newgroups, '.', fixed = T), '[[', 3))
 tissues <- unique(str_to_title(tissues))
@@ -88,6 +88,8 @@ new_fcs <- get_all_fc(ncombined, npeakarea[,-c(1:32)])
 
 ## Do again for getting new fold changes
 ogroups <- get_groups(pkareaorg[,-c(1:32, ncol(pkareaorg))])
+ogroups <- ogroups[which(str_count(ogroups, fixed(".")) == 2)]
+
 
 otissues <- unlist(lapply(strsplit(ogroups, '.', fixed = T), '[[', 3))
 otissues <- unique(str_to_title(otissues))
