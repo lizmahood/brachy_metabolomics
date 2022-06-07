@@ -68,7 +68,7 @@ Although I've never done it without VSN, if you're in that boat, I'd suggest: Pu
 ##### Launch Canopus
 Go through the scripts in the launching_canopus folder. First the mgf is filtered so that metabolites filtered out by script 2 (and any adducts) are removed. Then launch the 2nd script (which actually does Canopus). The third script gets the output and associates "confidence scores" with superclass/class/subclass/level.5/most.specific_class predictions. The fourth script removes predictions if their confidence score is <0.5 Finally it makes a couple of graphs.
 
-After all this, the most important output file you'll have is canopus_summary.tsv_filtered.tsv
+After all this, the most important output file you'll have is canopus_summary.tsv_filtered.tsv.  *If any column names have ".y" in them (for example: "superclass.y"), remove the ".y".*
 
 ##### 6_split_DAMs_into_updown_merge_canopus.R
 As this script requires the canopus_summary.tsv_filtered.tsv, Canopus needs to be completed before it. 
