@@ -135,10 +135,8 @@ def find_rdpi_superclass(control, test, aid, superclass, all_rdpi, rdpi_dist):
     bigsups = []
 
     for sup in scs:
-        print(sup)
         changed, tmpl, perc_tmpl = {}, [], []
         supdf = merged[(merged['class'] == sup)]
-
         ## New check 6.20.21
         if supdf.shape[0] >= 5:
             bigsups.append(sup)
@@ -155,6 +153,8 @@ def find_rdpi_superclass(control, test, aid, superclass, all_rdpi, rdpi_dist):
             nonzero_inds = tmpid_df.index[tmpid_df['Mean'] > 0]
             alignids = supdf.loc[nonzero_inds, 'Alignment.ID']
             changed['Alignment.ID'] = alignids.tolist()
+            print('Number of non-0 alignment IDs for this condition and superclass, via mean')
+            print(len(alignids.to_list()))
 
             ## Now getting other metrics (similar to RDPI) per class
             for ctrl in range(1, ccol+1):
@@ -163,6 +163,20 @@ def find_rdpi_superclass(control, test, aid, superclass, all_rdpi, rdpi_dist):
                     tstc = supdf.columns[tst]
                     newdf = pd.concat([supdf[ctrlc], supdf[tstc]], axis = 1)
                     nonzero = newdf[(newdf.sum(axis = 1) > 0)]
+
+                    ## debugging 
+                    print(f'Number of non-0 AID for {ctrl} and {tst}')
+                    print(nonzero.shape[0])
+                    hmm = supdf.columns[0]
+                    bug_newdf = pd.concat([supdf[hmm], supdf[ctrlc], supdf[tstc]], axis = 1)
+
+                    bug_nonzero = bug_newdf[(bug_newdf.iloc[:, [1,2]].sum(axis = 1) > 0)] 
+                    print(np.setdiff1d(alignids.tolist(), bug_nonzero['Alignment.ID'].tolist()))
+
+
+
+
+
                     ## For logging how much of the total RDPI is due to each superclass
                     topp = abs(nonzero.iloc[:, 0] - nonzero.iloc[:, 1])
                     bottom = nonzero.iloc[:, 0] + nonzero.iloc[:, 1]
@@ -178,8 +192,11 @@ def find_rdpi_superclass(control, test, aid, superclass, all_rdpi, rdpi_dist):
             
             ## Averaging across replicates
             divs = (tmpl / all_rdpi['RDPI']) 
+            if len(divs) < 5:
+                print(divs)
             rdpi.append(mean(divs))
             peakarea_change.append(mean(perc_tmpl))
+
             all_changes = pd.DataFrame.from_dict(changed)
             all_changes_rep_means = all_changes.drop('Alignment.ID', axis = 1).mean(axis = 1)
             this_sup = pd.Series([sup] * all_changes_rep_means.shape[0], dtype='object')
@@ -217,19 +234,25 @@ def put_test_with_control(inp_df, superclass = 'none'):
     else: outdf = pd.DataFrame(columns = ['Names', 'RDPI'])
     df = inp_df.drop(inp_df.columns[0:1], axis = 1)
 
-    ## which df columns belong to each type?
-    cold = {'Hydro.root':[], 'Hydro.leaf':[], 'Sym.root':[], 'Sym.leaf':[]}
-    for col in range(len(df.columns.tolist())):
-        if 'Hydro' in df.columns[col] and 'Root' in df.columns[col]:
-            cold['Hydro.root'].append(col)
-        elif 'Hydro' in df.columns[col] and 'Leaf' in df.columns[col]:
-            cold['Hydro.leaf'].append(col)
-        elif 'Sym' in df.columns[col] and 'Root' in df.columns[col]:
-            cold['Sym.root'].append(col)
-        elif 'Sym' in df.columns[col] and 'Leaf' in df.columns[col]:
-            cold['Sym.leaf'].append(col)
+    ## No more hard-coded conditions
+    groups = set([x.split('_')[0] for x in df.columns[1:]])
+    tis = set([x.split('.')[-1] for x in groups])
+    setts = set([x.split('.')[0] for x in groups])
+    cold = {}
+    for x in setts:
+        for y in tis:
+            ## Making sure that there is a control and stress condition in each set-tissue pair
+            condnames = [string for string in df.columns[1:].tolist() if x in string and y in string]
+            print(condnames)
+            condds = set([t.split('.')[1] for t in condnames])
+            if len(condds) > 1 and 'Ctrl' in condds:
+                cold[f'{x}.{y}'] = []
+                for col in range(len(df.columns.tolist())):
+                    if x in df.columns[col] and y in df.columns[col]:
+                        cold[f'{x}.{y}'].append(col)
 
     for k, v in cold.items():
+        print(k)
         tmpdf = df.iloc[:, v]
         if len(tmpdf.columns) > 0:
             ctrl_conds = tmpdf.columns.str.contains('Ctrl')
@@ -266,6 +289,7 @@ def main(inp, ofil, typ, superclass):
     :param typ: string
     '''
     df = make_df(inp,typ)
+    print(df.head)
     if superclass != 'none':   
         rdpidf, metabdf, clasrdpidf = put_test_with_control(df, superclass)
         pd.DataFrame.to_csv(metabdf, ofil + '_pk_area_change_per_metabolite.tsv', sep = '\t', index = False)
@@ -288,7 +312,6 @@ def main(inp, ofil, typ, superclass):
             out.write(f'{cols_to_write[val]}\t{shannon[val]}\t{num_pks[val]}\t{di[val]}\n')
 
 if __name__ == '__main__':
-
     if len(sys.argv) != 5:
         sys.exit('ARGS: 1) Input normalized peak area alignment file, \n'\
             'with negative values turned to 0 2) output name 3) metab OR trans\n'\

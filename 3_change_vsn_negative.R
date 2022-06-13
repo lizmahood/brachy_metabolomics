@@ -37,6 +37,9 @@ change_values <- function(fullinp){
   ##this only takes negative values and changes them to 0
   tochange <- as.matrix(fullinp[,-c(1:32)])
   tochange[tochange < 0] <- 0.01
+  ##new 6.10.22 -- VSN takes values of "1" and changes them to 0
+  ##this changes them back
+  tochange[tochange == 0] <- 1
   out <- data.frame(fullinp[,c(1:32)], tochange)
   return(out)
 }

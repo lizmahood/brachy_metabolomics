@@ -145,7 +145,7 @@ colorss <- c('forestgreen', 'saddlebrown')
 ## Now for colors for shannon/dj
 cvec <- c('salmon', 'mediumslateblue','palegreen', 'goldenrod2',
           'lightblue', 'forestgreen', 'plum3', 'darkorchid4', 'pink',
-          'azure4')
+          'azure4', 'black', 'darkred')
 
 pdf(paste0(argg[5], '_info_theory_plots.pdf'), height = 10, width = 10)
 #ggplot(shannon, aes(TotalPeaks, Shannon)) + geom_point(size = 2, color = 'navy') +
@@ -164,7 +164,7 @@ ggplot(stoplot, aes(di, Shannon, color = conds, shape = tiss, size = 1)) + geom_
 dev.off()
 
 pdf(paste0(argg[5], '_rdpi_all_main.pdf'), height = 3, width = 5)
-ggplot(rdpi, aes(test_data, RDPI, fill = tiss)) + geom_violin(alpha = 0.4) + geom_jitter(size = 0.2) + theme_bw() +
+ggplot(rdpi, aes(test_data, RDPI, fill = tiss)) + geom_violin(alpha = 0.4) + geom_jitter(size = 0.2, width = 0.25) + theme_bw() +
   labs(x = '', y = 'RDPI') + theme(axis.text.x = element_text(angle = 90, size = 10, hjust = 1)) +
   scale_fill_manual(values = colorss)
 
