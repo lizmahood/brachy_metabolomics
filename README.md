@@ -44,7 +44,7 @@ I recommend doing this next so that you can find any additional outliers based o
 Inputs: 1) Path to filtered/normalized peak file 2) Output directory 3) All experiments (put yes unless your normalized peak file only contains samples of one group) 4) Do you want your tissues/organs to be graphed together. If "no" -- right now it's hard-coded to look for leaf and root samples, you may have to change that. Additionally, there are only so many different groups you can have. If you have more than 10 conditions, you will have to put in more colors. 5) Put "metab"
 
 ##### 3_change_vsn_negative
-If you used VSN in step 2 -- it changes 0 values to negative values. This script changes them back to 0 (but only if they were 0 before VSN). To check this, you run step 2 again, but change argument 13 to "no", but keep everything else the same. You can skip this if you did NOT do VSN.
+If you used VSN in step 2 -- it changes 0 values to negative values, and 1 values to 0. This script changes negative back to 0 (but only if they were 0 before VSN), and 0 back to 1. To check this, you run step 2 again, but change argument 13 to "no", but keep everything else the same. You can skip this if you did NOT do VSN.
 Inputs: 1) VSN normalized file 2) file with everything else done except VSN
 
 Outputs another file with negative values changed to 0.01
